@@ -150,31 +150,54 @@ ActionRelay relayForAction(const String& action) {
   return ActionRelay::None;
 }
 
+void disableAllRelaysExcept(ActionRelay activeRelay) {
+  if (activeRelay != ActionRelay::Up) {
+    relayUpPtr->setEnabled(false);
+  }
+  if (activeRelay != ActionRelay::Down) {
+    relayDownPtr->setEnabled(false);
+  }
+  if (activeRelay != ActionRelay::Preset1) {
+    relayPreset1Ptr->setEnabled(false);
+  }
+  if (activeRelay != ActionRelay::Preset2) {
+    relayPreset2Ptr->setEnabled(false);
+  }
+  if (activeRelay != ActionRelay::Preset3) {
+    relayPreset3Ptr->setEnabled(false);
+  }
+}
+
 bool triggerRelay(ActionRelay relay) {
   switch (relay) {
     case ActionRelay::Up:
       if (relayUpPtr->enabled()) {
         relayUpPtr->setEnabled(false);
+        disableAllRelaysExcept(ActionRelay::None);
       } else {
-        relayDownPtr->setEnabled(false);
+        disableAllRelaysExcept(ActionRelay::Up);
         relayUpPtr->setEnabled(true);
       }
       return true;
     case ActionRelay::Down:
       if (relayDownPtr->enabled()) {
         relayDownPtr->setEnabled(false);
+        disableAllRelaysExcept(ActionRelay::None);
       } else {
-        relayUpPtr->setEnabled(false);
+        disableAllRelaysExcept(ActionRelay::Down);
         relayDownPtr->setEnabled(true);
       }
       return true;
     case ActionRelay::Preset1:
+      disableAllRelaysExcept(ActionRelay::Preset1);
       relayPreset1Ptr->trigger(kRelayPulseMs);
       return true;
     case ActionRelay::Preset2:
+      disableAllRelaysExcept(ActionRelay::Preset2);
       relayPreset2Ptr->trigger(kRelayPulseMs);
       return true;
     case ActionRelay::Preset3:
+      disableAllRelaysExcept(ActionRelay::Preset3);
       relayPreset3Ptr->trigger(kRelayPulseMs);
       return true;
     case ActionRelay::None:
@@ -187,13 +210,13 @@ bool setRelayPressed(ActionRelay relay, bool pressed) {
   switch (relay) {
     case ActionRelay::Up:
       if (pressed) {
-        relayDownPtr->setEnabled(false);
+        disableAllRelaysExcept(ActionRelay::Up);
       }
       relayUpPtr->setEnabled(pressed);
       return true;
     case ActionRelay::Down:
       if (pressed) {
-        relayUpPtr->setEnabled(false);
+        disableAllRelaysExcept(ActionRelay::Down);
       }
       relayDownPtr->setEnabled(pressed);
       return true;
@@ -205,12 +228,21 @@ bool setRelayPressed(ActionRelay relay, bool pressed) {
 bool setPresetPressed(ActionRelay relay, bool pressed) {
   switch (relay) {
     case ActionRelay::Preset1:
+      if (pressed) {
+        disableAllRelaysExcept(ActionRelay::Preset1);
+      }
       relayPreset1Ptr->setEnabled(pressed);
       return true;
     case ActionRelay::Preset2:
+      if (pressed) {
+        disableAllRelaysExcept(ActionRelay::Preset2);
+      }
       relayPreset2Ptr->setEnabled(pressed);
       return true;
     case ActionRelay::Preset3:
+      if (pressed) {
+        disableAllRelaysExcept(ActionRelay::Preset3);
+      }
       relayPreset3Ptr->setEnabled(pressed);
       return true;
     default:
@@ -406,12 +438,15 @@ void handlePresetStore(uint8_t presetNumber) {
 
   switch (relayToTrigger) {
     case ActionRelay::Preset1:
+      disableAllRelaysExcept(ActionRelay::Preset1);
       relayPreset1Ptr->trigger(kPresetStorePulseMs);
       break;
     case ActionRelay::Preset2:
+      disableAllRelaysExcept(ActionRelay::Preset2);
       relayPreset2Ptr->trigger(kPresetStorePulseMs);
       break;
     case ActionRelay::Preset3:
+      disableAllRelaysExcept(ActionRelay::Preset3);
       relayPreset3Ptr->trigger(kPresetStorePulseMs);
       break;
     default:
