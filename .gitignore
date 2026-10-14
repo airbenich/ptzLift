@@ -4,6 +4,10 @@
 !.env.example
 local.settings.json
 
+# azure
+.github
+.azure
+
 # PlatformIO / firmware
 .pio/
 .pioenvs/
