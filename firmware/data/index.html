@@ -61,6 +61,13 @@
         gap: 8px;
         margin-bottom: 10px;
       }
+      .pinout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        margin-top: 8px;
+        font-size: 0.9rem;
+      }
       button {
         min-height: 42px;
         border-radius: 10px;
@@ -107,6 +114,18 @@
       <div class="header">
         <h2>ptzPedestal</h2>
         <div class="status"><span class="dot"></span> Online</div>
+      </div>
+
+      <div class="card">
+        <div class="meta">GPIO Pinout</div>
+        <div class="pinout-grid">
+          <div>Up: <strong><span id="pinUp">--</span></strong></div>
+          <div>Down: <strong><span id="pinDown">--</span></strong></div>
+          <div>Preset 1: <strong><span id="pinPreset1">--</span></strong></div>
+          <div>Preset 2: <strong><span id="pinPreset2">--</span></strong></div>
+          <div>Preset 3: <strong><span id="pinPreset3">--</span></strong></div>
+          <div>Board: <strong><span id="boardName">--</span></strong></div>
+        </div>
       </div>
 
       <div class="card">

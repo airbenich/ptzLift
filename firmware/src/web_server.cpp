@@ -1,6 +1,7 @@
 #include <LittleFS.h>
 #include <WebServer.h>
 
+#include "config.h"
 #include "web_server.h"
 
 namespace {
@@ -45,6 +46,14 @@ String actionFromRequestBody() {
 String makeStatusJson(const DeviceSnapshot& snapshot) {
   String json = "{";
   json += "\"deviceId\":\"" + snapshot.deviceId + "\",";
+  json += "\"boardName\":\"" + String(kBoardName) + "\",";
+  json += "\"pinout\":{";
+  json += "\"up\":" + String(kRelayUpPin) + ",";
+  json += "\"down\":" + String(kRelayDownPin) + ",";
+  json += "\"preset1\":" + String(kRelayPreset1Pin) + ",";
+  json += "\"preset2\":" + String(kRelayPreset2Pin) + ",";
+  json += "\"preset3\":" + String(kRelayPreset3Pin);
+  json += "},";
   json += "\"relayState\":{";
   json += "\"up\":" + String(snapshot.relayUpEnabled ? 1 : 0) + ",";
   json += "\"down\":" + String(snapshot.relayDownEnabled ? 1 : 0) + ",";

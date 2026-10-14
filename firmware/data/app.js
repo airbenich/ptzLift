@@ -17,7 +17,15 @@ async function fetchStatus() {
     }
 
     const payload = await response.json();
+    const pinout = payload.pinout || {};
+
     setTextIfPresent('deviceId', payload.deviceId || 'unknown');
+    setTextIfPresent('pinUp', pinout.up !== undefined ? `GPIO${pinout.up}` : '--');
+    setTextIfPresent('pinDown', pinout.down !== undefined ? `GPIO${pinout.down}` : '--');
+    setTextIfPresent('pinPreset1', pinout.preset1 !== undefined ? `GPIO${pinout.preset1}` : '--');
+    setTextIfPresent('pinPreset2', pinout.preset2 !== undefined ? `GPIO${pinout.preset2}` : '--');
+    setTextIfPresent('pinPreset3', pinout.preset3 !== undefined ? `GPIO${pinout.preset3}` : '--');
+    setTextIfPresent('boardName', payload.boardName || 'ESP32');
     setTextIfPresent('relayUp', payload.relayState && payload.relayState.up ? 'ON' : 'OFF');
     setTextIfPresent('relayDown', payload.relayState && payload.relayState.down ? 'ON' : 'OFF');
     setTextIfPresent('relayPreset1', payload.relayState && payload.relayState.preset1 ? 'ON' : 'OFF');
