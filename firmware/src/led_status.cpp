@@ -5,33 +5,59 @@
 namespace {
 WifiLedState wifiState = WifiLedState::Off;
 unsigned long requestOverlayUntilMs = 0;
-bool outputState = false;
 bool ledAvailable = false;
+uint16_t lastWrittenBrightness = 256;
 
 constexpr unsigned long kRequestPulseMs = 90;
+constexpr uint8_t kLedMaxBrightness = 255;
+constexpr uint16_t kLedPwmFrequencyHz = 5000;
+constexpr uint8_t kLedPwmResolutionBits = 8;
 
-void writeLed(bool on) {
+void writeLedBrightness(uint8_t brightness) {
   if (!ledAvailable) {
     return;
   }
-  const bool physicalLevel = kBuiltInLedActiveHigh ? on : !on;
-  digitalWrite(kBuiltInLedPin, physicalLevel ? HIGH : LOW);
+
+  if (brightness == lastWrittenBrightness) {
+    return;
+  }
+
+  const uint8_t physicalBrightness = kBuiltInLedActiveHigh
+                                         ? brightness
+                                         : static_cast<uint8_t>(kLedMaxBrightness - brightness);
+  ledcWrite(kBuiltInLedPin, physicalBrightness);
+  lastWrittenBrightness = brightness;
 }
 
-bool connectingPattern(unsigned long nowMs) {
-  return (nowMs % 1000UL) < 500UL;
+uint8_t breathingBrightness(unsigned long nowMs,
+                           unsigned long periodMs,
+                           uint8_t minBrightness,
+                           uint8_t maxBrightness) {
+  if (periodMs < 2 || maxBrightness <= minBrightness) {
+    return maxBrightness;
+  }
+
+  const unsigned long halfPeriod = periodMs / 2;
+  const unsigned long phase = nowMs % periodMs;
+  const unsigned long ramp = phase < halfPeriod ? phase : (periodMs - phase);
+  const uint16_t span = static_cast<uint16_t>(maxBrightness - minBrightness);
+  return static_cast<uint8_t>(minBrightness + (span * ramp) / halfPeriod);
 }
 
-bool connectedPattern(unsigned long nowMs) {
-  return (nowMs % 2000UL) < 80UL;
+uint8_t connectingPattern(unsigned long nowMs) {
+  return breathingBrightness(nowMs, 1400UL, 0, 90);
 }
 
-bool fallbackPattern(unsigned long nowMs) {
+uint8_t connectedPattern(unsigned long nowMs) {
+  return breathingBrightness(nowMs, 2800UL, 4, 55);
+}
+
+uint8_t fallbackPattern(unsigned long nowMs) {
   const unsigned long phase = nowMs % 1400UL;
-  return phase < 120UL || (phase >= 240UL && phase < 360UL);
+  return (phase < 120UL || (phase >= 240UL && phase < 360UL)) ? kLedMaxBrightness : 0;
 }
 
-bool desiredBaseState(unsigned long nowMs) {
+uint8_t desiredBaseBrightness(unsigned long nowMs) {
   switch (wifiState) {
     case WifiLedState::Connecting:
       return connectingPattern(nowMs);
@@ -49,10 +75,9 @@ bool desiredBaseState(unsigned long nowMs) {
 void ledStatusBegin() {
   ledAvailable = kBuiltInLedPin >= 0;
   if (ledAvailable) {
-    pinMode(kBuiltInLedPin, OUTPUT);
+    ledAvailable = ledcAttach(kBuiltInLedPin, kLedPwmFrequencyHz, kLedPwmResolutionBits);
   }
-  writeLed(false);
-  outputState = false;
+  writeLedBrightness(0);
   requestOverlayUntilMs = 0;
 }
 
@@ -73,16 +98,13 @@ void ledStatusUpdate() {
   }
 
   const unsigned long nowMs = millis();
-  bool targetState = desiredBaseState(nowMs);
+  uint8_t targetBrightness = desiredBaseBrightness(nowMs);
 
   if (nowMs < requestOverlayUntilMs) {
-    targetState = true;
+    targetBrightness = kLedMaxBrightness;
   }
 
-  if (targetState != outputState) {
-    outputState = targetState;
-    writeLed(outputState);
-  }
+  writeLedBrightness(targetBrightness);
 }
 
 bool ledStatusAvailable() {

@@ -53,8 +53,8 @@ If your board variant has a controllable onboard LED, set `STATUS_LED_PIN` to th
 
 The firmware uses the built-in LED for connectivity and request activity:
 
-- Connecting to WiFi: slow blink
-- Connected to WiFi: short heartbeat blink
+- Connecting to WiFi: fast fading (breathing)
+- Connected to WiFi: slow fading (breathing)
 - Fallback AP mode: double blink
 - Any web request (API or static file): short pulse overlay
 

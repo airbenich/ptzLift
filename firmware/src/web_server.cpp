@@ -317,7 +317,6 @@ void serveIndexPage() {
 }
 
 void handleStatus() {
-  ledStatusSignalWebRequest();
   if (stateManagerPtr == nullptr) {
     webServer.send(500, "application/json", "{\"error\":{\"message\":\"state not initialized\"}}");
     return;
@@ -328,7 +327,6 @@ void handleStatus() {
 }
 
 void handleWifiStatus() {
-  ledStatusSignalWebRequest();
   webServer.send(200, "application/json", makeWifiStatusJson());
 }
 
@@ -353,7 +351,6 @@ bool persistWiFiConfig(const String& ssid, const String& password) {
 }
 
 void handleWifiSave() {
-  ledStatusSignalWebRequest();
   const String body = webServer.arg("plain");
   const String ssid = jsonStringField(body, "ssid");
   const String password = jsonStringField(body, "password");
@@ -571,7 +568,6 @@ void configureWebServer(DeviceStateManager& stateManager,
   presetManagerPtr = &presetManager;
 
   webServer.on("/", HTTP_GET, []() {
-    ledStatusSignalWebRequest();
     serveIndexPage();
   });
   webServer.on("/status", HTTP_GET, handleStatus);
@@ -589,13 +585,11 @@ void configureWebServer(DeviceStateManager& stateManager,
   webServer.on("/preset/press", HTTP_POST, []() { handlePresetPressRelease(true); });
   webServer.on("/preset/release", HTTP_POST, []() { handlePresetPressRelease(false); });
   webServer.on("/app.js", HTTP_GET, []() {
-    ledStatusSignalWebRequest();
     if (!serveStaticFile("/app.js")) {
       webServer.send(404, "text/plain", "app.js not found");
     }
   });
   webServer.onNotFound([]() {
-    ledStatusSignalWebRequest();
     String path = webServer.uri();
     if (path.length() > 0 && serveStaticFile(path)) {
       return;
