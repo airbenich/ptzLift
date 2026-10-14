@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ptzPedestal</title>
+    <style>
+      :root {
+        --primary: #1f6feb;
+        --accent: #f59e0b;
+        --surface: #0f172a;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --border: #334155;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--surface);
+        color: var(--text);
+      }
+      .container {
+        max-width: 460px;
+        margin: 0 auto;
+        padding: 24px 18px;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        background: rgba(15, 23, 42, 0.9);
+        margin-bottom: 12px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .status {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        color: var(--muted);
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+      }
+      .button-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .nav-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      button {
+        min-height: 42px;
+        border-radius: 10px;
+        background: var(--primary);
+        color: white;
+        border: 1px solid var(--border);
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .warning {
+        background: var(--accent);
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .api-doc {
+        margin-top: 10px;
+      }
+      .api-doc details {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+        margin-top: 8px;
+      }
+      .api-doc summary {
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .endpoint {
+        margin-top: 8px;
+        font-family: Menlo, Monaco, Consolas, monospace;
+        font-size: 0.78rem;
+        color: var(--text);
+        line-height: 1.45;
+      }
+      .endpoint code {
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>ptzPedestal</h2>
+        <div class="status"><span class="dot"></span> Online</div>
+      </div>
+
+      <div class="card">
+        <div class="meta">Relay State</div>
+        <div>Up: <span id="relayUp">OFF</span></div>
+        <div>Down: <span id="relayDown">OFF</span></div>
+        <div>Preset 1: <span id="relayPreset1">OFF</span></div>
+        <div>Preset 2: <span id="relayPreset2">OFF</span></div>
+        <div>Preset 3: <span id="relayPreset3">OFF</span></div>
+      </div>
+
+      <div class="card">
+        <div class="meta">Last Action:</div>
+        <div id="preset">Default</div>
+      </div>
+
+      <div class="nav-row">
+        <button onclick="triggerRelayAction('up')">▲ Up</button>
+        <button class="warning" onclick="triggerRelayAction('stop')">Stop</button>
+        <button onclick="triggerRelayAction('down')">▼ Down</button>
+      </div>
+
+      <div class="button-row" style="grid-template-columns: 1fr 1fr; margin-bottom: 10px;">
+        <button onclick="setRelayPressState('up', true)">UP Press</button>
+        <button onclick="setRelayPressState('up', false)">UP Release</button>
+        <button onclick="setRelayPressState('down', true)">DOWN Press</button>
+        <button onclick="setRelayPressState('down', false)">DOWN Release</button>
+      </div>
+
+      <div class="button-row">
+        <button onclick="triggerRelayAction('preset1')">Preset 1</button>
+        <button onclick="triggerRelayAction('preset2')">Preset 2</button>
+        <button onclick="triggerRelayAction('preset3')">Preset 3</button>
+      </div>
+
+      <div class="button-row" style="margin-top: 8px;">
+        <button class="warning" onclick="triggerPresetStore(1)">Store P1</button>
+        <button class="warning" onclick="triggerPresetStore(2)">Store P2</button>
+        <button class="warning" onclick="triggerPresetStore(3)">Store P3</button>
+      </div>
+
+      <div class="card api-doc">
+        <div class="meta">REST API Endpoints</div>
+
+        <details>
+          <summary>GET /status</summary>
+          <div class="endpoint">
+            Returns device status, relay states and last action.<br />
+            <code>Response keys:</code> deviceId, relayState, preset, healthy, companionConnected
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /relay/toggle</summary>
+          <div class="endpoint">
+            Toggles one action relay state for up/down and pulses preset relays.<br />
+            <code>Body:</code> {"action":"up|down|preset1|preset2|preset3|stop"}
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /relay/press</summary>
+          <div class="endpoint">
+            Sets UP or DOWN relay explicitly to ON (press behavior).<br />
+            <code>Body:</code> {"action":"up|down"}
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /relay/release</summary>
+          <div class="endpoint">
+            Sets UP or DOWN relay explicitly to OFF (release behavior).<br />
+            <code>Body:</code> {"action":"up|down"}
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /preset/1, /preset/2, /preset/3</summary>
+          <div class="endpoint">
+            Triggers the corresponding preset relay (short pulse).<br />
+            <code>Body:</code> none
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /preset/1/store, /preset/2/store, /preset/3/store</summary>
+          <div class="endpoint">
+            Triggers the corresponding preset relay in store mode (6s hold).<br />
+            <code>Body:</code> none
+          </div>
+        </details>
+
+        <details>
+          <summary>Static files</summary>
+          <div class="endpoint">
+            <code>GET /</code> index page<br />
+            <code>GET /app.js</code> web client script
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
