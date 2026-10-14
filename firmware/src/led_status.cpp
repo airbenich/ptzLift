@@ -45,7 +45,7 @@ uint8_t breathingBrightness(unsigned long nowMs,
 }
 
 uint8_t connectingPattern(unsigned long nowMs) {
-  return breathingBrightness(nowMs, 1400UL, 0, 90);
+  return breathingBrightness(nowMs, 900UL, 0, 90);
 }
 
 uint8_t connectedPattern(unsigned long nowMs) {
