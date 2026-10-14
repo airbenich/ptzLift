@@ -13,7 +13,7 @@ constexpr uint8_t kRelayDownPin = 27;
 constexpr uint8_t kRelayPreset1Pin = 25;
 constexpr uint8_t kRelayPreset2Pin = 32;
 constexpr uint8_t kRelayPreset3Pin = 33;
-constexpr uint32_t kUpDownMaxOnMs = 25000;
+constexpr uint32_t kUpDownMaxOnMs = 25000; // max time that the pedestal is driving
 constexpr char kDeviceId[] = "PTZ-Pedestal-Control";
 
 #ifndef WIFI_SSID
