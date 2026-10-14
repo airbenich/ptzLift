@@ -1,10 +1,10 @@
 # ptzPedestal
 
-Local-only M5StickC preset controller with a companion module and local web UI.
+Local-only ESP32 PTZ pedestal relay controller with a companion module and local web UI.
 
 ## Components
 
-- `firmware/`: ESP32 firmware for the M5StickC controller and embedded web server.
+- `firmware/`: ESP32 firmware for the DevKitC V4 target and embedded web server.
 - `companion/`: Node.js companion service that interacts with the device over HTTP.
 - `.azure/`: project plan and integration artifacts.
 
@@ -14,7 +14,7 @@ Local-only M5StickC preset controller with a companion module and local web UI.
 
 - Python 3
 - PlatformIO Core (`pio`)
-- A connected M5StickC via USB serial
+- A connected ESP32 DevKitC V4 via USB serial
 
 ### Install PlatformIO
 
@@ -70,7 +70,7 @@ From the project root:
 python3 -m platformio run -d firmware
 ```
 
-### Flash firmware to the M5StickC
+### Flash firmware to the ESP32 DevKitC V4
 
 Make sure the device is connected over USB and the serial port is detected, then run:
 
@@ -92,10 +92,43 @@ python3 -m platformio device monitor -d firmware
 
 ## Local operation
 
-1. Flash the firmware to the M5StickC with PlatformIO.
+1. Flash the firmware to the ESP32 DevKitC V4 with PlatformIO.
 2. Power the board and connect to its local Wi‑Fi access point.
 3. Run the companion service with `npm --prefix companion install && npm --prefix companion run dev`.
-4. Use the device web UI at `http://m5stick-local/` or the companion routes.
+4. Use the device web UI at `http://<device-ip>/` or the companion routes.
+
+## Relay behavior
+
+- Exclusivity rule: whenever one relay is pressed/activated, all other relays are switched OFF.
+- This applies to Up/Down and also to Preset 1/2/3 actions.
+- Up/Down are toggle relays with auto-off timeout.
+- Preset relays support pulse, store, and explicit press/release endpoints.
+
+## REST API
+
+### Status and WiFi
+
+- `GET /status`: complete device status, including relay states and `ledState`.
+- `GET /wifi/status`: WiFi mode, current SSID, saved SSID, IP.
+- `POST /wifi/save`: save SSID/password, reconnect, fallback to AP if connect fails.
+
+### Relay control
+
+- `POST /relay/toggle` body `{"action":"up|down|preset1|preset2|preset3|stop"}`
+- `POST /relay/press` body `{"action":"up|down"}`
+- `POST /relay/release` body `{"action":"up|down"}`
+
+### Preset control
+
+- `POST /preset/1`, `POST /preset/2`, `POST /preset/3`: trigger preset pulse.
+- `POST /preset/1/store`, `POST /preset/2/store`, `POST /preset/3/store`: 6s store pulse.
+- `POST /preset/press` body `{"action":"preset1|preset2|preset3"}`
+- `POST /preset/release` body `{"action":"preset1|preset2|preset3"}`
+
+### Static files
+
+- `GET /`: web UI
+- `GET /app.js`: client script
 
 ## Scope
 

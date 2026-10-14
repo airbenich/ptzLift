@@ -195,10 +195,35 @@
         <div class="meta">REST API Endpoints</div>
 
         <details>
+          <summary>Relay behavior</summary>
+          <div class="endpoint">
+            Exclusivity rule: when one relay is pressed/activated, all other relays are set to OFF.<br />
+            Applies to UP, DOWN, Preset 1, Preset 2 and Preset 3.
+          </div>
+        </details>
+
+        <details>
           <summary>GET /status</summary>
           <div class="endpoint">
             Returns device status, relay states and last action.<br />
-            <code>Response keys:</code> deviceId, relayState, preset, healthy, companionConnected
+            <code>Response keys:</code> deviceId, relayState, preset, healthy, companionConnected, ledState, wifi
+          </div>
+        </details>
+
+        <details>
+          <summary>GET /wifi/status</summary>
+          <div class="endpoint">
+            Returns current Wi‑Fi mode and network information.<br />
+            <code>Response keys:</code> mode, connected, ssid, savedSsid, ip
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /wifi/save</summary>
+          <div class="endpoint">
+            Saves Wi‑Fi credentials and reconnects immediately.<br />
+            If STA connect fails, device falls back to AP mode.<br />
+            <code>Body:</code> {"ssid":"...","password":"..."}
           </div>
         </details>
 
