@@ -202,6 +202,22 @@ bool setRelayPressed(ActionRelay relay, bool pressed) {
   }
 }
 
+bool setPresetPressed(ActionRelay relay, bool pressed) {
+  switch (relay) {
+    case ActionRelay::Preset1:
+      relayPreset1Ptr->setEnabled(pressed);
+      return true;
+    case ActionRelay::Preset2:
+      relayPreset2Ptr->setEnabled(pressed);
+      return true;
+    case ActionRelay::Preset3:
+      relayPreset3Ptr->setEnabled(pressed);
+      return true;
+    default:
+      return false;
+  }
+}
+
 void applyActionState(const String& action, const String& presetName) {
   ActionRelay relayToTrigger = relayForAction(action);
   if (action == "stop") {
@@ -473,6 +489,35 @@ void handleRelayPressRelease(bool pressed) {
   webServer.send(200, "application/json",
                  "{\"action\":\"" + action + "\",\"state\":\"" + String(pressed ? "pressed" : "released") + "\",\"status\":\"ok\"}");
 }
+
+void handlePresetPressRelease(bool pressed) {
+  ledStatusSignalWebRequest();
+  if (relayPreset1Ptr == nullptr || relayPreset2Ptr == nullptr || relayPreset3Ptr == nullptr || stateManagerPtr == nullptr) {
+    webServer.send(500, "application/json", "{\"error\":{\"message\":\"relay controller not initialized\"}}");
+    return;
+  }
+
+  const String action = actionFromRequestBody();
+  const ActionRelay relay = relayForAction(action);
+  if (!setPresetPressed(relay, pressed)) {
+    webServer.send(400, "application/json",
+                   "{\"error\":{\"message\":\"invalid action, expected preset1, preset2 or preset3\"}}");
+    return;
+  }
+
+  if (pressed) {
+    lastTriggeredRelay = relay;
+  }
+
+  stateManagerPtr->setRelayState(relayUpPtr->enabled(),
+                                 relayDownPtr->enabled(),
+                                 relayPreset1Ptr->enabled(),
+                                 relayPreset2Ptr->enabled(),
+                                 relayPreset3Ptr->enabled());
+
+  webServer.send(200, "application/json",
+                 "{\"action\":\"" + action + "\",\"state\":\"" + String(pressed ? "pressed" : "released") + "\",\"status\":\"ok\"}");
+}
 }  // namespace
 
 void configureWebServer(DeviceStateManager& stateManager,
@@ -506,6 +551,8 @@ void configureWebServer(DeviceStateManager& stateManager,
   webServer.on("/relay/toggle", HTTP_POST, handleRelayToggle);
   webServer.on("/relay/press", HTTP_POST, []() { handleRelayPressRelease(true); });
   webServer.on("/relay/release", HTTP_POST, []() { handleRelayPressRelease(false); });
+  webServer.on("/preset/press", HTTP_POST, []() { handlePresetPressRelease(true); });
+  webServer.on("/preset/release", HTTP_POST, []() { handlePresetPressRelease(false); });
   webServer.on("/app.js", HTTP_GET, []() {
     ledStatusSignalWebRequest();
     if (!serveStaticFile("/app.js")) {

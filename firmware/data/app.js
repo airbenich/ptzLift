@@ -71,6 +71,21 @@ async function setRelayPressState(action, pressed) {
   fetchStatus();
 }
 
+async function setPresetPressState(action, pressed) {
+  const validActions = ['preset1', 'preset2', 'preset3'];
+  if (!validActions.includes(action)) {
+    return;
+  }
+
+  const endpoint = pressed ? '/preset/press' : '/preset/release';
+  await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action })
+  });
+  fetchStatus();
+}
+
 async function triggerPreset(id) {
   const actionMap = {
     1: 'preset1',

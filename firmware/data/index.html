@@ -176,6 +176,15 @@
         <button onclick="triggerRelayAction('preset3')">Preset 3</button>
       </div>
 
+      <div class="button-row" style="grid-template-columns: 1fr 1fr; margin-top: 8px;">
+        <button onclick="setPresetPressState('preset1', true)">P1 Press</button>
+        <button onclick="setPresetPressState('preset1', false)">P1 Release</button>
+        <button onclick="setPresetPressState('preset2', true)">P2 Press</button>
+        <button onclick="setPresetPressState('preset2', false)">P2 Release</button>
+        <button onclick="setPresetPressState('preset3', true)">P3 Press</button>
+        <button onclick="setPresetPressState('preset3', false)">P3 Release</button>
+      </div>
+
       <div class="button-row" style="margin-top: 8px;">
         <button class="warning" onclick="triggerPresetStore(1)">Store P1</button>
         <button class="warning" onclick="triggerPresetStore(2)">Store P2</button>
@@ -214,6 +223,22 @@
           <div class="endpoint">
             Sets UP or DOWN relay explicitly to OFF (release behavior).<br />
             <code>Body:</code> {"action":"up|down"}
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /preset/press</summary>
+          <div class="endpoint">
+            Sets one preset relay explicitly to ON (hold behavior).<br />
+            <code>Body:</code> {"action":"preset1|preset2|preset3"}
+          </div>
+        </details>
+
+        <details>
+          <summary>POST /preset/release</summary>
+          <div class="endpoint">
+            Sets one preset relay explicitly to OFF (release behavior).<br />
+            <code>Body:</code> {"action":"preset1|preset2|preset3"}
           </div>
         </details>
 
