@@ -1,7 +1,9 @@
 #include <LittleFS.h>
 #include <WebServer.h>
+#include <WiFi.h>
 
 #include "config.h"
+#include "led_status.h"
 #include "web_server.h"
 
 namespace {
@@ -43,6 +45,65 @@ String actionFromRequestBody() {
   return action;
 }
 
+String escapeJsonString(const String& value) {
+  String escaped = value;
+  escaped.replace("\\", "\\\\");
+  escaped.replace("\"", "\\\"");
+  escaped.replace("\n", "\\n");
+  escaped.replace("\r", "\\r");
+  return escaped;
+}
+
+String jsonStringField(const String& body, const String& fieldName) {
+  const String marker = "\"" + fieldName + "\":\"";
+  const int fieldStart = body.indexOf(marker);
+  if (fieldStart < 0) {
+    return "";
+  }
+
+  const int valueStart = fieldStart + marker.length();
+  const int valueEnd = body.indexOf("\"", valueStart);
+  if (valueEnd <= valueStart) {
+    return "";
+  }
+
+  return body.substring(valueStart, valueEnd);
+}
+
+String makeWifiStatusJson() {
+  const uint8_t mode = WiFi.getMode();
+  String ssid = WiFi.SSID();
+  String ipAddress = "";
+  if (WiFi.status() == WL_CONNECTED) {
+    ipAddress = WiFi.localIP().toString();
+  } else if (mode == WIFI_AP) {
+    ipAddress = WiFi.softAPIP().toString();
+    ssid = WiFi.softAPSSID();
+  }
+
+  String savedSsid = "";
+  if (LittleFS.exists("/wifi.cfg")) {
+    File cfg = LittleFS.open("/wifi.cfg", "r");
+    if (cfg) {
+      String contents = cfg.readString();
+      cfg.close();
+      const int newlinePos = contents.indexOf('\n');
+      if (newlinePos > 0) {
+        savedSsid = contents.substring(0, newlinePos);
+      }
+    }
+  }
+
+  String json = "{";
+  json += "\"mode\":\"" + String(mode == WIFI_AP ? "AP" : (mode == WIFI_STA ? "STA" : "OFF")) + "\",";
+  json += "\"connected\":" + String(WiFi.status() == WL_CONNECTED ? "true" : "false") + ",";
+  json += "\"ssid\":\"" + escapeJsonString(ssid) + "\",";
+  json += "\"savedSsid\":\"" + escapeJsonString(savedSsid) + "\",";
+  json += "\"ip\":\"" + escapeJsonString(ipAddress) + "\"";
+  json += "}";
+  return json;
+}
+
 String makeStatusJson(const DeviceSnapshot& snapshot) {
   String json = "{";
   json += "\"deviceId\":\"" + snapshot.deviceId + "\",";
@@ -63,7 +124,9 @@ String makeStatusJson(const DeviceSnapshot& snapshot) {
   json += "},";
   json += "\"preset\":\"" + snapshot.preset + "\",";
   json += "\"healthy\":" + String(snapshot.healthy ? "true" : "false") + ",";
-  json += "\"companionConnected\":" + String(snapshot.companionConnected ? "true" : "false");
+  json += "\"companionConnected\":" + String(snapshot.companionConnected ? "true" : "false") + ",";
+  json += "\"ledState\":\"" + String(ledStatusStateName()) + "\",";
+  json += "\"wifi\":" + makeWifiStatusJson();
   json += "}";
   return json;
 }
@@ -206,6 +269,7 @@ void serveIndexPage() {
 }
 
 void handleStatus() {
+  ledStatusSignalWebRequest();
   if (stateManagerPtr == nullptr) {
     webServer.send(500, "application/json", "{\"error\":{\"message\":\"state not initialized\"}}");
     return;
@@ -215,7 +279,74 @@ void handleStatus() {
   webServer.send(200, "application/json", makeStatusJson(snapshot));
 }
 
+void handleWifiStatus() {
+  ledStatusSignalWebRequest();
+  webServer.send(200, "application/json", makeWifiStatusJson());
+}
+
+bool persistWiFiConfig(const String& ssid, const String& password) {
+  if (ssid.length() == 0 || password.length() == 0) {
+    return false;
+  }
+
+  if (!LittleFS.begin(true)) {
+    return false;
+  }
+
+  File file = LittleFS.open("/wifi.cfg", "w");
+  if (!file) {
+    return false;
+  }
+
+  file.println(ssid);
+  file.println(password);
+  file.close();
+  return true;
+}
+
+void handleWifiSave() {
+  ledStatusSignalWebRequest();
+  const String body = webServer.arg("plain");
+  const String ssid = jsonStringField(body, "ssid");
+  const String password = jsonStringField(body, "password");
+
+  if (ssid.length() == 0 || password.length() == 0) {
+    webServer.send(400, "application/json", "{\"error\":{\"message\":\"ssid and password are required\"}}");
+    return;
+  }
+
+  if (!persistWiFiConfig(ssid, password)) {
+    webServer.send(500, "application/json", "{\"error\":{\"message\":\"failed to store WiFi credentials\"}}");
+    return;
+  }
+
+  ledStatusSetWifiState(WifiLedState::Connecting);
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid.c_str(), password.c_str());
+
+  const unsigned long startTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 20000UL) {
+    ledStatusUpdate();
+    delay(250);
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    ledStatusSetWifiState(WifiLedState::Connected);
+    webServer.send(200, "application/json",
+                   "{\"status\":\"saved_and_connected\",\"ssid\":\"" + escapeJsonString(ssid) + "\",\"ip\":\"" + WiFi.localIP().toString() + "\"}");
+    return;
+  }
+
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(kAccessPointSsid);
+  ledStatusSetWifiState(WifiLedState::FallbackAp);
+  webServer.send(200, "application/json",
+                 "{\"status\":\"saved_but_ap_fallback\",\"ssid\":\"" + escapeJsonString(ssid) + "\",\"ap\":\"" + escapeJsonString(kAccessPointSsid) + "\"}");
+}
+
 void handlePreset(uint8_t presetNumber) {
+  ledStatusSignalWebRequest();
   if (presetManagerPtr == nullptr) {
     webServer.send(500, "application/json", "{\"error\":{\"message\":\"preset manager not initialized\"}}");
     return;
@@ -237,6 +368,7 @@ void handlePreset(uint8_t presetNumber) {
 }
 
 void handlePresetStore(uint8_t presetNumber) {
+  ledStatusSignalWebRequest();
   if (relayPreset1Ptr == nullptr || relayPreset2Ptr == nullptr || relayPreset3Ptr == nullptr || stateManagerPtr == nullptr) {
     webServer.send(500, "application/json", "{\"error\":{\"message\":\"relay controller not initialized\"}}");
     return;
@@ -284,6 +416,7 @@ void handlePresetStore(uint8_t presetNumber) {
 }
 
 void handleRelayToggle() {
+  ledStatusSignalWebRequest();
   if (relayUpPtr == nullptr || relayDownPtr == nullptr || relayPreset1Ptr == nullptr ||
       relayPreset2Ptr == nullptr || relayPreset3Ptr == nullptr || stateManagerPtr == nullptr) {
     webServer.send(500, "application/json", "{\"error\":{\"message\":\"relay controller not initialized\"}}");
@@ -312,6 +445,7 @@ void handleRelayToggle() {
 }
 
 void handleRelayPressRelease(bool pressed) {
+  ledStatusSignalWebRequest();
   if (relayUpPtr == nullptr || relayDownPtr == nullptr || relayPreset1Ptr == nullptr ||
       relayPreset2Ptr == nullptr || relayPreset3Ptr == nullptr || stateManagerPtr == nullptr) {
     webServer.send(500, "application/json", "{\"error\":{\"message\":\"relay controller not initialized\"}}");
@@ -356,8 +490,13 @@ void configureWebServer(DeviceStateManager& stateManager,
   relayPreset3Ptr = &relayPreset3;
   presetManagerPtr = &presetManager;
 
-  webServer.on("/", HTTP_GET, serveIndexPage);
+  webServer.on("/", HTTP_GET, []() {
+    ledStatusSignalWebRequest();
+    serveIndexPage();
+  });
   webServer.on("/status", HTTP_GET, handleStatus);
+  webServer.on("/wifi/status", HTTP_GET, handleWifiStatus);
+  webServer.on("/wifi/save", HTTP_POST, handleWifiSave);
   webServer.on("/preset/1", HTTP_POST, []() { handlePreset(1); });
   webServer.on("/preset/2", HTTP_POST, []() { handlePreset(2); });
   webServer.on("/preset/3", HTTP_POST, []() { handlePreset(3); });
@@ -368,11 +507,13 @@ void configureWebServer(DeviceStateManager& stateManager,
   webServer.on("/relay/press", HTTP_POST, []() { handleRelayPressRelease(true); });
   webServer.on("/relay/release", HTTP_POST, []() { handleRelayPressRelease(false); });
   webServer.on("/app.js", HTTP_GET, []() {
+    ledStatusSignalWebRequest();
     if (!serveStaticFile("/app.js")) {
       webServer.send(404, "text/plain", "app.js not found");
     }
   });
   webServer.onNotFound([]() {
+    ledStatusSignalWebRequest();
     String path = webServer.uri();
     if (path.length() > 0 && serveStaticFile(path)) {
       return;

@@ -18,6 +18,7 @@ async function fetchStatus() {
 
     const payload = await response.json();
     const pinout = payload.pinout || {};
+    const wifi = payload.wifi || {};
 
     setTextIfPresent('deviceId', payload.deviceId || 'unknown');
     setTextIfPresent('pinUp', pinout.up !== undefined ? `GPIO${pinout.up}` : '--');
@@ -32,6 +33,10 @@ async function fetchStatus() {
     setTextIfPresent('relayPreset2', payload.relayState && payload.relayState.preset2 ? 'ON' : 'OFF');
     setTextIfPresent('relayPreset3', payload.relayState && payload.relayState.preset3 ? 'ON' : 'OFF');
     setTextIfPresent('preset', payload.preset || 'Unknown');
+    setTextIfPresent('wifiMode', wifi.mode || 'OFF');
+    setTextIfPresent('wifiSsid', wifi.ssid || '--');
+    setTextIfPresent('savedWifiSsid', wifi.savedSsid || '--');
+    setTextIfPresent('wifiIp', wifi.ip || '--');
   } catch (error) {
     console.error('Failed to fetch status:', error);
   }
@@ -96,6 +101,45 @@ function changePreset(direction) {
   const action = direction < 0 ? 'up' : 'down';
   return triggerRelayAction(action);
 }
+
+document.getElementById('wifiForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const ssidInput = document.getElementById('wifiSsidInput');
+  const passwordInput = document.getElementById('wifiPasswordInput');
+  const message = document.getElementById('wifiMessage');
+
+  if (!ssidInput || !passwordInput || !message) {
+    return;
+  }
+
+  const ssid = ssidInput.value.trim();
+  const password = passwordInput.value.trim();
+  if (!ssid || !password) {
+    message.textContent = 'Please enter both SSID and password.';
+    return;
+  }
+
+  message.textContent = 'Saving Wi‑Fi settings...';
+  try {
+    const response = await fetch('/wifi/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ssid, password })
+    });
+
+    const result = await response.json();
+    message.textContent = result.status || 'Wi‑Fi settings updated.';
+    passwordInput.value = '';
+    await fetchStatus();
+    if (result.ip) {
+      setTimeout(fetchStatus, 1500);
+    }
+  } catch (error) {
+    console.error('Failed to save Wi‑Fi settings:', error);
+    message.textContent = 'Failed to save Wi‑Fi settings.';
+  }
+});
 
 fetchStatus();
 setInterval(fetchStatus, 5000);

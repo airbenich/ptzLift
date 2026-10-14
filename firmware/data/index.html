@@ -8,10 +8,10 @@
       :root {
         --primary: #1f6feb;
         --accent: #f59e0b;
-        --surface: #0f172a;
+        --surface: #111111;
         --text: #e2e8f0;
         --muted: #94a3b8;
-        --border: #334155;
+        --border: #353535;
       }
       body {
         margin: 0;
@@ -25,10 +25,10 @@
         padding: 24px 18px;
       }
       .card {
-        border: 1px solid var(--border);
+        border: 1px solid var(--border);    
         border-radius: 12px;
         padding: 16px;
-        background: rgba(15, 23, 42, 0.9);
+        background: rgba(30, 30, 30, 0.9);
         margin-bottom: 12px;
       }
       .header {
@@ -140,6 +140,21 @@
       <div class="card">
         <div class="meta">Last Action:</div>
         <div id="preset">Default</div>
+      </div>
+
+      <div class="card">
+        <div class="meta">Wi‑Fi</div>
+        <div>Mode: <span id="wifiMode">--</span></div>
+        <div>SSID: <span id="wifiSsid">--</span></div>
+        <div>Saved SSID: <span id="savedWifiSsid">--</span></div>
+        <div>IP: <span id="wifiIp">--</span></div>
+
+        <form id="wifiForm" style="margin-top: 12px; display: grid; gap: 8px;">
+          <input id="wifiSsidInput" type="text" placeholder="Wi‑Fi SSID" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: #222222; color: var(--text);" />
+          <input id="wifiPasswordInput" type="password" placeholder="Wi‑Fi Password" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: #222222; color: var(--text);" />
+          <button type="submit">Save and reconnect</button>
+        </form>
+        <div id="wifiMessage" class="meta" style="margin-top: 8px; min-height: 20px;"></div>
       </div>
 
       <div class="nav-row">

@@ -29,11 +29,38 @@ Create a `.env` file in the project root (next to this README):
 ```env
 WIFI_SSID=your-wifi-ssid
 WIFI_PASSWORD=your-wifi-password
+WIFI_AP_SSID=ptzpedestal-local
 ```
 
 You can start from `.env.example`.
 
+The fallback access point is intentionally open and has no password. The AP SSID is configured in `.env` so it stays out of source control.
+
 The firmware build injects these values at compile time via PlatformIO pre-build script, so credentials stay out of source files.
+
+### Optional status LED output
+
+The official ESP32 DevKitC V4 typically exposes a fixed 5V power LED (not GPIO-controlled). Because of this, status LED signaling is disabled by default:
+
+```env
+STATUS_LED_PIN=-1
+STATUS_LED_ACTIVE_HIGH=1
+```
+
+If your board variant has a controllable onboard LED, set `STATUS_LED_PIN` to that GPIO (often `2` on some clones) and adjust polarity with `STATUS_LED_ACTIVE_HIGH`.
+
+## Built-in LED status feedback
+
+The firmware uses the built-in LED for connectivity and request activity:
+
+- Connecting to WiFi: slow blink
+- Connected to WiFi: short heartbeat blink
+- Fallback AP mode: double blink
+- Any web request (API or static file): short pulse overlay
+
+The request pulse is layered on top of the WiFi pattern and returns automatically to the current WiFi state pattern.
+
+If no controllable LED is configured (`STATUS_LED_PIN=-1`), the firmware reports `"ledState":"unavailable"` in `/status`.
 
 ### Build firmware
 
