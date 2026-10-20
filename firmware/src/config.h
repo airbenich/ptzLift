@@ -8,6 +8,8 @@ constexpr uint8_t kRelayDownPin = 33;
 constexpr uint8_t kRelayPreset1Pin = 25;
 constexpr uint8_t kRelayPreset2Pin = 26;
 constexpr uint8_t kRelayPreset3Pin = 27;
+constexpr uint8_t kManualUpSwitchPin = 21;
+constexpr uint8_t kManualDownSwitchPin = 22;
 
 #ifndef STATUS_LED_PIN
 #define STATUS_LED_PIN -1

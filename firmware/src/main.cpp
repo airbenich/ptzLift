@@ -177,6 +177,9 @@ void setup() {
     Serial.println("LittleFS mount failed");
   }
 
+  pinMode(kManualUpSwitchPin, INPUT_PULLUP);
+  pinMode(kManualDownSwitchPin, INPUT_PULLUP);
+
   relayUp.begin(kRelayUpPin, "Relay Up");
   relayDown.begin(kRelayDownPin, "Relay Down");
   relayUp.setAutoOffTimeoutMs(kUpDownMaxOnMs);
@@ -218,6 +221,20 @@ void setup() {
 }
 
 void loop() {
+  const bool manualUpPressed = (digitalRead(kManualUpSwitchPin) == LOW);
+  const bool manualDownPressed = (digitalRead(kManualDownSwitchPin) == LOW);
+
+  if (manualUpPressed && !manualDownPressed) {
+    relayUp.setEnabled(true);
+    relayDown.setEnabled(false);
+  } else if (manualDownPressed && !manualUpPressed) {
+    relayUp.setEnabled(false);
+    relayDown.setEnabled(true);
+  } else {
+    relayUp.setEnabled(false);
+    relayDown.setEnabled(false);
+  }
+
   ledStatusUpdate();
   handleWebServer();
   relayUp.update();
