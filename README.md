@@ -1,6 +1,6 @@
-# ptzPedestal
+# ptzLift
 
-Local-only ESP32 PTZ pedestal relay controller with a companion module and local web UI.
+Local-only ESP32 PTZ lift relay controller with a companion module and local web UI.
 
 ## Components
 
@@ -29,7 +29,7 @@ Create a `.env` file in the project root (next to this README):
 ```env
 WIFI_SSID=your-wifi-ssid
 WIFI_PASSWORD=your-wifi-password
-WIFI_AP_SSID=ptzpedestal-local
+WIFI_AP_SSID=ptzlift-local
 ```
 
 You can start from `.env.example`.

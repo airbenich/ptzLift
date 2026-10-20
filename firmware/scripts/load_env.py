@@ -39,7 +39,7 @@ vars_map = _parse_env_file(env_path)
 
 ssid = vars_map.get("WIFI_SSID", "")
 password = vars_map.get("WIFI_PASSWORD", "")
-fallback_ap_ssid = vars_map.get("WIFI_AP_SSID", "ptzpedestal-local")
+fallback_ap_ssid = vars_map.get("WIFI_AP_SSID", "ptzlift-local")
 status_led_pin = vars_map.get("STATUS_LED_PIN", "-1")
 status_led_active_high = vars_map.get("STATUS_LED_ACTIVE_HIGH", "1")
 
@@ -55,7 +55,7 @@ if not ssid or not password:
     print("[load_env.py] WARNING: WIFI_SSID or WIFI_PASSWORD missing in .env; firmware will use fallback placeholder values.")
 
 if not vars_map.get("WIFI_AP_SSID"):
-    print("[load_env.py] INFO: WIFI_AP_SSID not set in .env; using default fallback AP SSID 'ptzpedestal-local' without a password.")
+    print("[load_env.py] INFO: WIFI_AP_SSID not set in .env; using default fallback AP SSID 'ptzlift-local' without a password.")
 
 if not vars_map.get("STATUS_LED_PIN"):
     print("[load_env.py] INFO: STATUS_LED_PIN not set in .env; LED status output disabled by default on ESP32 DevKitC V4.")

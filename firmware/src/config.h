@@ -20,11 +20,11 @@ constexpr uint8_t kRelayPreset3Pin = 27;
 constexpr int8_t kBuiltInLedPin = STATUS_LED_PIN;
 constexpr bool kBuiltInLedActiveHigh = STATUS_LED_ACTIVE_HIGH != 0;
 constexpr uint32_t kUpDownMaxOnMs = 25000;
-constexpr char kDeviceId[] = "PTZ-Pedestal-Control";
+constexpr char kDeviceId[] = "PTZ-Lift-Control";
 constexpr char kBoardName[] = "ESP32 DevKitC V4";
 
 #ifndef WIFI_AP_SSID
-#define WIFI_AP_SSID "ptzpedestal-local"
+#define WIFI_AP_SSID "ptzlift-local"
 #endif
 
 constexpr char kAccessPointSsid[] = WIFI_AP_SSID;
