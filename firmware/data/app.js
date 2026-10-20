@@ -26,6 +26,8 @@ async function fetchStatus() {
     setTextIfPresent('pinPreset1', pinout.preset1 !== undefined ? `GPIO${pinout.preset1}` : '--');
     setTextIfPresent('pinPreset2', pinout.preset2 !== undefined ? `GPIO${pinout.preset2}` : '--');
     setTextIfPresent('pinPreset3', pinout.preset3 !== undefined ? `GPIO${pinout.preset3}` : '--');
+    setTextIfPresent('pinManualUp', pinout.manualUp !== undefined ? `GPIO${pinout.manualUp}` : '--');
+    setTextIfPresent('pinManualDown', pinout.manualDown !== undefined ? `GPIO${pinout.manualDown}` : '--');
     setTextIfPresent('boardName', payload.boardName || 'ESP32');
     setTextIfPresent('relayUp', payload.relayState && payload.relayState.up ? 'ON' : 'OFF');
     setTextIfPresent('relayDown', payload.relayState && payload.relayState.down ? 'ON' : 'OFF');

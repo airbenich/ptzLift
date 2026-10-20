@@ -113,7 +113,9 @@ String makeStatusJson(const DeviceSnapshot& snapshot) {
   json += "\"down\":" + String(kRelayDownPin) + ",";
   json += "\"preset1\":" + String(kRelayPreset1Pin) + ",";
   json += "\"preset2\":" + String(kRelayPreset2Pin) + ",";
-  json += "\"preset3\":" + String(kRelayPreset3Pin);
+  json += "\"preset3\":" + String(kRelayPreset3Pin) + ",";
+  json += "\"manualUp\":" + String(kManualUpSwitchPin) + ",";
+  json += "\"manualDown\":" + String(kManualDownSwitchPin);
   json += "},";
   json += "\"relayState\":{";
   json += "\"up\":" + String(snapshot.relayUpEnabled ? 1 : 0) + ",";
