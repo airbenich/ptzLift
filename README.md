@@ -1,12 +1,10 @@
 # ptzLift
 
-Local-only ESP32 PTZ lift relay controller with a companion module and local web UI.
+Local-only ESP32 PTZ lift relay controller with a local web UI and REST API.
 
 ## Components
 
 - `firmware/`: ESP32 firmware for the DevKitC V4 target and embedded web server.
-- `companion/`: Node.js companion service that interacts with the device over HTTP.
-- `.azure/`: project plan and integration artifacts.
 
 ## Build and flash the firmware
 
@@ -94,8 +92,7 @@ python3 -m platformio device monitor -d firmware
 
 1. Flash the firmware to the ESP32 DevKitC V4 with PlatformIO.
 2. Power the board and connect to its local Wi‑Fi access point.
-3. Run the companion service with `npm --prefix companion install && npm --prefix companion run dev`.
-4. Use the device web UI at `http://<device-ip>/` or the companion routes.
+3. Use the device web UI at `http://<device-ip>/` or the REST routes.
 
 ## Relay behavior
 

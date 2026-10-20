@@ -16,10 +16,6 @@ local.settings.json
 *.elf
 *.hex
 
-# Node / companion
-node_modules/
-companion/dist/
-
 # Editor / OS
 .DS_Store
 .vscode/

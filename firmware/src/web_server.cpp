@@ -124,7 +124,6 @@ String makeStatusJson(const DeviceSnapshot& snapshot) {
   json += "},";
   json += "\"preset\":\"" + snapshot.preset + "\",";
   json += "\"healthy\":" + String(snapshot.healthy ? "true" : "false") + ",";
-  json += "\"companionConnected\":" + String(snapshot.companionConnected ? "true" : "false") + ",";
   json += "\"ledState\":\"" + String(ledStatusStateName()) + "\",";
   json += "\"wifi\":" + makeWifiStatusJson();
   json += "}";

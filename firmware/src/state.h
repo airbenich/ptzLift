@@ -12,7 +12,6 @@ struct DeviceSnapshot {
   bool relayPreset2Enabled;
   bool relayPreset3Enabled;
   String preset;
-  bool companionConnected;
 };
 
 class DeviceStateManager {
@@ -26,7 +25,6 @@ class DeviceStateManager {
                      bool relayPreset2Enabled,
                      bool relayPreset3Enabled);
   void setPreset(const String& preset);
-  void setCompanionConnected(bool connected);
   void setHealthy(bool healthy);
 
  private:
@@ -38,7 +36,6 @@ class DeviceStateManager {
   bool relayPreset2Enabled_;
   bool relayPreset3Enabled_;
   String preset_;
-  bool companionConnected_;
 };
 
 #endif

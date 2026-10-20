@@ -8,8 +8,7 @@ DeviceStateManager::DeviceStateManager()
   relayPreset1Enabled_(false),
   relayPreset2Enabled_(false),
   relayPreset3Enabled_(false),
-      preset_("Default"),
-      companionConnected_(true) {}
+      preset_("Default")
 
 void DeviceStateManager::begin(const String& deviceId) {
   deviceId_ = deviceId;
@@ -25,7 +24,6 @@ DeviceSnapshot DeviceStateManager::snapshot() const {
   snapshot.relayPreset2Enabled = relayPreset2Enabled_;
   snapshot.relayPreset3Enabled = relayPreset3Enabled_;
   snapshot.preset = preset_;
-  snapshot.companionConnected = companionConnected_;
   return snapshot;
 }
 
@@ -43,10 +41,6 @@ void DeviceStateManager::setRelayState(bool relayUpEnabled,
 
 void DeviceStateManager::setPreset(const String& preset) {
   preset_ = preset;
-}
-
-void DeviceStateManager::setCompanionConnected(bool connected) {
-  companionConnected_ = connected;
 }
 
 void DeviceStateManager::setHealthy(bool healthy) {

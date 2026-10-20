@@ -193,7 +193,6 @@ void setup() {
                              relayPreset3.enabled());
   stateManager.setPreset(presetManager.currentPresetName());
   stateManager.setHealthy(true);
-  stateManager.setCompanionConnected(true);
 
   configureWebServer(stateManager,
                     relayUp,
