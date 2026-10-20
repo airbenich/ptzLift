@@ -10,6 +10,8 @@ uint16_t lastWrittenBrightness = 256;
 
 constexpr unsigned long kRequestPulseMs = 90;
 constexpr uint8_t kLedMaxBrightness = 255;
+constexpr uint8_t kConnectingMaxBrightness = 180;
+constexpr uint8_t kConnectedMaxBrightness = 110;
 constexpr uint16_t kLedPwmFrequencyHz = 5000;
 constexpr uint8_t kLedPwmResolutionBits = 8;
 
@@ -45,11 +47,11 @@ uint8_t breathingBrightness(unsigned long nowMs,
 }
 
 uint8_t connectingPattern(unsigned long nowMs) {
-  return breathingBrightness(nowMs, 900UL, 0, 90);
+  return breathingBrightness(nowMs, 900UL, 0, kConnectingMaxBrightness);
 }
 
 uint8_t connectedPattern(unsigned long nowMs) {
-  return breathingBrightness(nowMs, 2800UL, 4, 55);
+  return breathingBrightness(nowMs, 2800UL, 8, kConnectedMaxBrightness);
 }
 
 uint8_t fallbackPattern(unsigned long nowMs) {
