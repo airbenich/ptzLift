@@ -3,12 +3,13 @@
 DeviceStateManager::DeviceStateManager()
     : deviceId_("M5StickC"),
       healthy_(true),
-  relayUpEnabled_(false),
-  relayDownEnabled_(false),
-  relayPreset1Enabled_(false),
-  relayPreset2Enabled_(false),
-  relayPreset3Enabled_(false),
-      preset_("Default")
+      relayUpEnabled_(false),
+      relayDownEnabled_(false),
+      relayPreset1Enabled_(false),
+      relayPreset2Enabled_(false),
+      relayPreset3Enabled_(false),
+      preset_("Default") {
+}
 
 void DeviceStateManager::begin(const String& deviceId) {
   deviceId_ = deviceId;
