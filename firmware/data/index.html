@@ -230,58 +230,58 @@
         </details>
 
         <details>
-          <summary>POST /relay/toggle</summary>
+          <summary>GET /relay/toggle?action=...</summary>
           <div class="endpoint">
             Toggles one action relay state for up/down and pulses preset relays.<br />
-            <code>Body:</code> {"action":"up|down|preset1|preset2|preset3|stop"}
+            <code>Query:</code> action=up|down|preset1|preset2|preset3|stop
           </div>
         </details>
 
         <details>
-          <summary>POST /relay/press</summary>
+          <summary>GET /relay/press?action=up|down</summary>
           <div class="endpoint">
             Sets UP or DOWN relay explicitly to ON (press behavior).<br />
-            <code>Body:</code> {"action":"up|down"}
+            <code>Query:</code> action=up|down
           </div>
         </details>
 
         <details>
-          <summary>POST /relay/release</summary>
+          <summary>GET /relay/release?action=up|down</summary>
           <div class="endpoint">
             Sets UP or DOWN relay explicitly to OFF (release behavior).<br />
-            <code>Body:</code> {"action":"up|down"}
+            <code>Query:</code> action=up|down
           </div>
         </details>
 
         <details>
-          <summary>POST /preset/press</summary>
+          <summary>GET /preset/press?action=preset1|preset2|preset3</summary>
           <div class="endpoint">
             Sets one preset relay explicitly to ON (hold behavior).<br />
-            <code>Body:</code> {"action":"preset1|preset2|preset3"}
+            <code>Query:</code> action=preset1|preset2|preset3
           </div>
         </details>
 
         <details>
-          <summary>POST /preset/release</summary>
+          <summary>GET /preset/release?action=preset1|preset2|preset3</summary>
           <div class="endpoint">
             Sets one preset relay explicitly to OFF (release behavior).<br />
-            <code>Body:</code> {"action":"preset1|preset2|preset3"}
+            <code>Query:</code> action=preset1|preset2|preset3
           </div>
         </details>
 
         <details>
-          <summary>POST /preset/1, /preset/2, /preset/3</summary>
+          <summary>GET /preset/1, /preset/2, /preset/3</summary>
           <div class="endpoint">
             Triggers the corresponding preset relay (short pulse).<br />
-            <code>Body:</code> none
+            <code>Query:</code> none
           </div>
         </details>
 
         <details>
-          <summary>POST /preset/1/store, /preset/2/store, /preset/3/store</summary>
+          <summary>GET /preset/1/store, /preset/2/store, /preset/3/store</summary>
           <div class="endpoint">
             Triggers the corresponding preset relay in store mode (6s hold).<br />
-            <code>Body:</code> none
+            <code>Query:</code> none
           </div>
         </details>
 

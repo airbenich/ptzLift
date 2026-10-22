@@ -29,9 +29,16 @@ enum class ActionRelay : uint8_t {
 
 ActionRelay lastTriggeredRelay = ActionRelay::None;
 
-String actionFromRequestBody() {
+String requestFieldValue(const String& fieldName);
+
+String actionFromRequest() {
+  String action = webServer.arg("action");
+  if (action.length() > 0) {
+    return action;
+  }
+
   const String body = webServer.arg("plain");
-  String action = "";
+  action = "";
   const int actionPos = body.indexOf("\"action\":\"");
   if (actionPos < 0) {
     return action;
@@ -68,6 +75,16 @@ String jsonStringField(const String& body, const String& fieldName) {
   }
 
   return body.substring(valueStart, valueEnd);
+}
+
+String requestFieldValue(const String& fieldName) {
+  String value = webServer.arg(fieldName);
+  if (value.length() > 0) {
+    return value;
+  }
+
+  const String body = webServer.arg("plain");
+  return jsonStringField(body, fieldName);
 }
 
 String makeWifiStatusJson() {
@@ -352,9 +369,8 @@ bool persistWiFiConfig(const String& ssid, const String& password) {
 }
 
 void handleWifiSave() {
-  const String body = webServer.arg("plain");
-  const String ssid = jsonStringField(body, "ssid");
-  const String password = jsonStringField(body, "password");
+  const String ssid = requestFieldValue("ssid");
+  const String password = requestFieldValue("password");
 
   if (ssid.length() == 0 || password.length() == 0) {
     webServer.send(400, "application/json", "{\"error\":{\"message\":\"ssid and password are required\"}}");
@@ -472,7 +488,7 @@ void handleRelayToggle() {
     return;
   }
 
-  String action = actionFromRequestBody();
+  String action = actionFromRequest();
 
   if (action == "up") {
     applyActionState("up", "Up");
@@ -501,7 +517,7 @@ void handleRelayPressRelease(bool pressed) {
     return;
   }
 
-  const String action = actionFromRequestBody();
+  const String action = actionFromRequest();
   const ActionRelay relay = relayForAction(action);
   if (!setRelayPressed(relay, pressed)) {
     webServer.send(400, "application/json",
@@ -530,7 +546,7 @@ void handlePresetPressRelease(bool pressed) {
     return;
   }
 
-  const String action = actionFromRequestBody();
+  const String action = actionFromRequest();
   const ActionRelay relay = relayForAction(action);
   if (!setPresetPressed(relay, pressed)) {
     webServer.send(400, "application/json",
@@ -575,15 +591,26 @@ void configureWebServer(DeviceStateManager& stateManager,
   webServer.on("/wifi/status", HTTP_GET, handleWifiStatus);
   webServer.on("/wifi/save", HTTP_POST, handleWifiSave);
   webServer.on("/preset/1", HTTP_POST, []() { handlePreset(1); });
+  webServer.on("/preset/1", HTTP_GET, []() { handlePreset(1); });
   webServer.on("/preset/2", HTTP_POST, []() { handlePreset(2); });
+  webServer.on("/preset/2", HTTP_GET, []() { handlePreset(2); });
   webServer.on("/preset/3", HTTP_POST, []() { handlePreset(3); });
+  webServer.on("/preset/3", HTTP_GET, []() { handlePreset(3); });
   webServer.on("/preset/1/store", HTTP_POST, []() { handlePresetStore(1); });
+  webServer.on("/preset/1/store", HTTP_GET, []() { handlePresetStore(1); });
   webServer.on("/preset/2/store", HTTP_POST, []() { handlePresetStore(2); });
+  webServer.on("/preset/2/store", HTTP_GET, []() { handlePresetStore(2); });
   webServer.on("/preset/3/store", HTTP_POST, []() { handlePresetStore(3); });
+  webServer.on("/preset/3/store", HTTP_GET, []() { handlePresetStore(3); });
+  webServer.on("/relay/toggle", HTTP_GET, handleRelayToggle);
   webServer.on("/relay/toggle", HTTP_POST, handleRelayToggle);
+  webServer.on("/relay/press", HTTP_GET, []() { handleRelayPressRelease(true); });
   webServer.on("/relay/press", HTTP_POST, []() { handleRelayPressRelease(true); });
+  webServer.on("/relay/release", HTTP_GET, []() { handleRelayPressRelease(false); });
   webServer.on("/relay/release", HTTP_POST, []() { handleRelayPressRelease(false); });
+  webServer.on("/preset/press", HTTP_GET, []() { handlePresetPressRelease(true); });
   webServer.on("/preset/press", HTTP_POST, []() { handlePresetPressRelease(true); });
+  webServer.on("/preset/release", HTTP_GET, []() { handlePresetPressRelease(false); });
   webServer.on("/preset/release", HTTP_POST, []() { handlePresetPressRelease(false); });
   webServer.on("/app.js", HTTP_GET, []() {
     if (!serveStaticFile("/app.js")) {

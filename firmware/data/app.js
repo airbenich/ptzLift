@@ -50,11 +50,8 @@ async function triggerRelayAction(action) {
     return;
   }
 
-  await fetch('/relay/toggle', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action })
-  });
+  const query = new URLSearchParams({ action });
+  await fetch(`/relay/toggle?${query.toString()}`);
   fetchStatus();
 }
 
@@ -65,11 +62,8 @@ async function setRelayPressState(action, pressed) {
   }
 
   const endpoint = pressed ? '/relay/press' : '/relay/release';
-  await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action })
-  });
+  const query = new URLSearchParams({ action });
+  await fetch(`${endpoint}?${query.toString()}`);
   fetchStatus();
 }
 
@@ -80,11 +74,8 @@ async function setPresetPressState(action, pressed) {
   }
 
   const endpoint = pressed ? '/preset/press' : '/preset/release';
-  await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action })
-  });
+  const query = new URLSearchParams({ action });
+  await fetch(`${endpoint}?${query.toString()}`);
   fetchStatus();
 }
 
@@ -108,9 +99,7 @@ async function triggerPresetStore(id) {
     return;
   }
 
-  await fetch(`/preset/${id}/store`, {
-    method: 'POST'
-  });
+  await fetch(`/preset/${id}/store`);
   fetchStatus();
 }
 
