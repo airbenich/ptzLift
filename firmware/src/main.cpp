@@ -224,16 +224,27 @@ void loop() {
   const bool manualUpPressed = (digitalRead(kManualUpSwitchPin) == LOW);
   const bool manualDownPressed = (digitalRead(kManualDownSwitchPin) == LOW);
 
-  if (manualUpPressed && !manualDownPressed) {
-    relayUp.setEnabled(true);
-    relayDown.setEnabled(false);
-  } else if (manualDownPressed && !manualUpPressed) {
-    relayUp.setEnabled(false);
-    relayDown.setEnabled(true);
-  } else {
-    relayUp.setEnabled(false);
-    relayDown.setEnabled(false);
+  static bool previousManualUpPressed = false;
+  static bool previousManualDownPressed = false;
+  const bool manualStateChanged =
+      (manualUpPressed != previousManualUpPressed) ||
+      (manualDownPressed != previousManualDownPressed);
+
+  if (manualStateChanged) {
+    if (manualUpPressed && !manualDownPressed) {
+      relayUp.setEnabled(true);
+      relayDown.setEnabled(false);
+    } else if (manualDownPressed && !manualUpPressed) {
+      relayUp.setEnabled(false);
+      relayDown.setEnabled(true);
+    } else {
+      relayUp.setEnabled(false);
+      relayDown.setEnabled(false);
+    }
   }
+
+  previousManualUpPressed = manualUpPressed;
+  previousManualDownPressed = manualDownPressed;
 
   ledStatusUpdate();
   handleWebServer();
