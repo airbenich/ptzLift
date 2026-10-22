@@ -15,7 +15,7 @@ RelayController* relayPreset1Ptr = nullptr;
 RelayController* relayPreset2Ptr = nullptr;
 RelayController* relayPreset3Ptr = nullptr;
 PresetManager* presetManagerPtr = nullptr;
-constexpr uint16_t kRelayPulseMs = 150;
+constexpr uint16_t kRelayPulseMs = 80;
 constexpr uint16_t kPresetStorePulseMs = 6000;
 
 enum class ActionRelay : uint8_t {
