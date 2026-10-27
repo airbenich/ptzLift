@@ -1,0 +1,20 @@
+{
+  "device_filter": "",
+  "bearer_token": "",
+  "headers": {},
+  "timeout_seconds": 5,
+  "requests": {
+    "F3": {
+      "press":   {"url": "http://192.168.1.100:80/relay/press?action=up",   "method": "GET"},
+      "release": {"url": "http://192.168.1.100:80/relay/release?action=up", "method": "GET"}
+    },
+    "F2": {
+      "press":   {"url": "http://192.168.1.100:80/preset/press?action=preset2", "method": "GET"},
+      "release": {"url": "http://192.168.1.100:80/preset/release?action=preset2",   "method": "GET"}
+    },
+    "F1": {
+      "press":   {"url": "http://192.168.1.100:80/relay/press?action=down",   "method": "GET"},
+      "release": {"url": "http://192.168.1.100:80/relay/release?action=down", "method": "GET"}
+    }
+  }
+}
